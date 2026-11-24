@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>App Bambú Turnos</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+/* VOICE everyday, tierno y claro: una app para familias de un centro terapéutico infantil
+   IDEA el cuaderno de turnos del Bambú: cañas de bambú, panda, corazón naranja del logo
+   PICTURE la tarjeta del próximo turno, grande, con el panda; en Pedir turno, la tira de días y los horarios
+   COLOUR blanco, verde agua Bambú #1f9e95 dominante, naranja #f0843a para acciones, verde caña #8cc152 de apoyo
+   TYPE Nunito 900 títulos + Nunito 400/700 texto (redondeada como el logo)
+   LAYOUT escritorio: nota para revisión + selector familia/centro a la izquierda, teléfono a la derecha; celular: app a pantalla completa */
+:root{color-scheme:light dark;--back:light-dark(#0f5e59,#062b28);--bg:light-dark(#ffffff,#101716);--ink:light-dark(#173533,#eaf5f3);--mut:light-dark(#5b7472,#a5bdba);--card:light-dark(#eef8f6,#18231f);--line:light-dark(#d6ebe7,#26332f);--tq:light-dark(#1f9e95,#4cc9bf);--tqd:light-dark(#137870,#7fded6);--or:#f0843a;--ori:#ffffff;--cana:#8cc152;--soft:light-dark(#fff1e6,#33231a);--warn:light-dark(#fff4d6,#3a3214)}
+:root[data-theme=light]{color-scheme:light}:root[data-theme=dark]{color-scheme:dark}
+*{box-sizing:border-box;min-width:0}
+html,body{height:100%}
+body{margin:0;background:var(--back);color:var(--ink);font:16px/1.5 Nunito,system-ui,sans-serif;overflow-x:clip}
+button,input,select,textarea{font:inherit;color:inherit}
+a{color:var(--tq)}
+.wrap{min-height:100%;display:grid;grid-template-columns:minmax(0,380px) auto;gap:56px;justify-content:center;align-items:center;padding:32px max(5vw,16px)}
+.note{color:#e6f6f3}
+.note h1{font-size:42px;line-height:1.05;letter-spacing:-.02em;margin:0 0 14px;font-weight:900;text-wrap:balance}
+.note p,.note ol{color:#c6e6e1;margin:0 0 12px}
+.note ol{padding-left:20px}.note li{margin-bottom:6px}
+.note small{color:#9fcac4;font-size:13px;display:block;margin-top:10px}
+.mode{display:inline-grid;grid-template-columns:1fr 1fr;background:rgba(255,255,255,.12);border-radius:14px;padding:4px;margin:6px 0 10px}
+.mode button{border:0;background:none;color:#e6f6f3;min-height:44px;padding:0 18px;border-radius:10px;font-weight:800;cursor:pointer}
+.mode button.on{background:#fff;color:#137870}
+.phone{width:390px;height:820px;max-height:calc(100svh - 48px);background:var(--bg);border-radius:44px;border:10px solid #10100e;box-shadow:0 30px 60px rgba(0,0,0,.35);position:relative;overflow:hidden;display:flex;flex-direction:column}
+.status{height:34px;flex:none;display:flex;justify-content:space-between;align-items:center;padding:0 26px;font-size:13px;font-weight:800;color:var(--ink)}
+.screen{flex:1;overflow-y:auto;overflow-x:hidden}
+.tabs{flex:none;display:grid;grid-template-columns:repeat(5,minmax(0,1fr));border-top:1px solid var(--line);background:var(--bg);padding:6px 4px 10px}
+.tab{border:0;background:none;display:flex;flex-direction:column;align-items:center;gap:2px;font-size:11px;font-weight:800;color:var(--mut);min-height:48px;cursor:pointer}
+.tab svg{width:24px;height:24px}
+.tab.on{color:var(--tqd)}
+.tab.plus .ic{background:var(--or);color:#fff;width:48px;height:48px;border-radius:50%;display:grid;place-items:center;margin-top:-22px;box-shadow:0 6px 14px rgba(240,132,58,.4)}
+button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{outline:3px solid var(--or);outline-offset:2px}
+.top{padding:4px 20px 14px;display:flex;justify-content:space-between;align-items:center;gap:10px}
+.brand{display:flex;align-items:flex-end;gap:2px;color:var(--tq)}
+.brand svg{width:44px;height:44px;flex:none}
+.brand b{font-weight:900;font-size:30px;line-height:.8;letter-spacing:-.02em}
+.brand small{display:block;color:var(--or);font-size:10px;font-weight:800;margin-top:4px;white-space:nowrap}
+.proto{font-size:12px;background:var(--card);border-radius:99px;padding:3px 10px;white-space:nowrap;color:var(--mut);font-weight:700}
+.pad{padding:0 20px 18px}
+h2{font-size:30px;line-height:1.05;letter-spacing:-.02em;margin:2px 0 6px;font-weight:900;text-wrap:balance}
+h3{font-size:19px;line-height:1.2;margin:6px 0 10px;font-weight:900}
+.sub{color:var(--mut);margin:0 0 14px}
+.next{background:var(--tq);color:#fff;border-radius:24px;padding:18px;position:relative;overflow:hidden}
+.next .when{font-size:15px;font-weight:700;opacity:.9}
+.next .big{font-size:34px;font-weight:900;line-height:1;margin:2px 0 6px;letter-spacing:-.02em}
+.next .who{font-size:15px;font-weight:700}
+.next .panda{position:absolute;right:-6px;bottom:-8px;width:118px;height:118px}
+.next .chip{display:inline-block;margin-top:10px;background:rgba(255,255,255,.2);border-radius:99px;padding:4px 10px;font-size:13px;font-weight:800}
+.acts{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-top:12px}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:48px;padding:0 18px;border-radius:14px;border:0;background:var(--or);color:var(--ori);font-weight:800;cursor:pointer;text-decoration:none}
+.btn.tq{background:var(--tq);color:#fff}
+.btn.ghost{background:var(--bg);color:var(--ink);border:1.5px solid var(--line)}
+.btn.sm{min-height:44px;padding:0 10px;font-size:14px}
+.btn.full{width:100%}
+.btn[disabled]{opacity:.45;cursor:not-allowed}
+.alert{display:flex;gap:10px;align-items:flex-start;background:var(--warn);border-radius:16px;padding:12px 14px;margin:14px 0 0;font-size:14px}
+.alert svg{width:22px;height:22px;flex:none;color:#c07a00}
+.quick{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.q{border:1px solid var(--line);background:var(--card);border-radius:18px;padding:14px;text-align:left;cursor:pointer;min-height:84px}
+.q svg{width:26px;height:26px;color:var(--tq)}
+.q b{display:block;font-size:15px;margin-top:4px}
+.q span{font-size:13px;color:var(--mut)}
+.promo{background:var(--soft);border-radius:20px;padding:16px;display:flex;gap:12px;align-items:center;text-align:left;border:0;width:100%;cursor:pointer}
+.promo svg{width:70px;height:70px;flex:none}
+.promo b{display:block;font-size:17px;line-height:1.2}
+.promo span{font-size:14px;color:var(--mut)}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip2{border:1.5px solid var(--line);background:var(--bg);border-radius:99px;padding:8px 14px;min-height:44px;cursor:pointer;font-weight:800;font-size:15px}
+.chip2.on{background:var(--tq);border-color:var(--tq);color:#fff}
+.lbl{font-size:14px;font-weight:900;margin:18px 0 8px}
+.days{display:flex;gap:8px;overflow-x:auto;scroll-snap-type:x mandatory;padding-bottom:4px;scrollbar-width:none}
+.day{flex:none;scroll-snap-align:start;width:58px;border:1.5px solid var(--line);background:var(--bg);border-radius:16px;padding:8px 0;text-align:center;cursor:pointer}
+.day small{display:block;font-size:12px;color:var(--mut);font-weight:700}
+.day b{font-size:20px;font-weight:900}
+.day.on{background:var(--tq);border-color:var(--tq);color:#fff}
+.day.on small{color:#e6f6f3}
+.day.full b{color:var(--mut)}
+.slots{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.slot{border:1.5px solid var(--line);background:var(--bg);border-radius:12px;min-height:46px;font-weight:800;cursor:pointer;white-space:nowrap}
+.slot.on{background:var(--or);border-color:var(--or);color:#fff}
+.slot:disabled{text-decoration:line-through;color:var(--mut);background:var(--card);cursor:not-allowed;opacity:.7}
+.empty{background:var(--card);border-radius:18px;padding:16px;text-align:center}
+.empty svg{width:90px;height:90px}
+.sticky{position:sticky;bottom:0;background:linear-gradient(to top,var(--bg) 70%,transparent);padding:16px 20px 14px}
+.trow{display:flex;gap:12px;padding:12px 0;border-bottom:1px solid var(--line);align-items:center}
+.date{width:54px;flex:none;text-align:center;border-radius:14px;background:var(--card);padding:6px 0}
+.date small{display:block;font-size:11px;font-weight:800;color:var(--mut);text-transform:lowercase}
+.date b{font-size:20px;font-weight:900;line-height:1.1}
+.trow .info{flex:1}
+.trow strong{display:block;font-size:15px}
+.trow span{font-size:13px;color:var(--mut)}
+.st{font-size:12px;font-weight:800;padding:3px 9px;border-radius:99px;white-space:nowrap}
+.st.ok{background:color-mix(in srgb,var(--cana) 25%,var(--bg));color:light-dark(#3d6b14,#b8e08c)}
+.st.pend{background:var(--warn);color:light-dark(#8a5a00,#f3cf72)}
+.st.ag{background:var(--card);color:var(--tqd)}
+.st.aus{background:light-dark(#fde4e1,#3b1f1c);color:light-dark(#b0362a,#f2a59b)}
+.st.can{background:var(--card);color:var(--mut)}
+.seg{display:grid;grid-template-columns:1fr 1fr;background:var(--card);border-radius:14px;padding:4px;border:1px solid var(--line);margin-bottom:6px}
+.seg button{border:0;background:none;min-height:44px;border-radius:10px;font-weight:800;cursor:pointer;color:var(--mut)}
+.seg button.on{background:var(--bg);color:var(--ink);box-shadow:0 1px 4px rgba(0,0,0,.12)}
+.sheetbg{position:absolute;inset:0;background:rgba(0,0,0,.45);display:none;align-items:flex-end;z-index:5}
+.sheetbg.open{display:flex}
+.sheet{background:var(--bg);width:100%;border-radius:24px 24px 0 0;padding:10px 20px 24px;max-height:90%;overflow-y:auto}
+.grab{width:44px;height:5px;border-radius:9px;background:var(--line);margin:0 auto 12px}
+.kv{display:flex;justify-content:space-between;gap:10px;padding:10px 0;border-bottom:1px solid var(--line)}
+.kv small{color:var(--mut);font-size:14px}
+.kv b{font-size:15px;text-align:right}
+.center{text-align:center}
+.center svg.pd{width:120px;height:120px}
+.box{background:var(--card);border-radius:16px;padding:12px 14px;font-size:14px;margin-top:12px}
+.news{background:var(--card);border-radius:20px;overflow:hidden;margin-bottom:12px}
+.news .art{height:150px;background:linear-gradient(160deg,color-mix(in srgb,var(--tq) 30%,var(--bg)),var(--card));display:grid;place-items:center}
+.news .art svg{width:130px;height:130px}
+.news div.t{padding:14px}
+.news b{font-size:18px;display:block;line-height:1.2}
+.news p{margin:6px 0 0;font-size:14px;color:var(--mut)}
+.tag{display:inline-block;font-size:12px;font-weight:800;background:var(--soft);color:light-dark(#b45a1c,#f5b07c);padding:3px 9px;border-radius:99px;margin-bottom:6px}
+.kid{display:flex;gap:12px;align-items:center;padding:12px;border-radius:16px;background:var(--card);margin-bottom:8px}
+.av{width:46px;height:46px;border-radius:50%;display:grid;place-items:center;font-weight:900;color:#fff;flex:none}
+.kid b{display:block}
+.kid span{font-size:13px;color:var(--mut)}
+.stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px}
+.stat{background:var(--card);border-radius:14px;padding:10px 6px;text-align:center}
+.stat b{display:block;font-size:24px;font-weight:900;line-height:1.1}
+.stat span{font-size:11px;font-weight:700;color:var(--mut)}
+.ag{display:grid;grid-template-columns:52px minmax(0,1fr) auto;gap:10px;align-items:center;padding:10px 0;border-bottom:1px solid var(--line)}
+.ag time{font-weight:900;font-size:15px;white-space:nowrap}
+.ag strong{display:block;font-size:15px}
+.ag span{font-size:13px;color:var(--mut)}
+.toast{position:absolute;left:50%;bottom:92px;transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:12px;font-size:14px;font-weight:800;opacity:0;transition:opacity .2s;pointer-events:none;z-index:9;white-space:nowrap}
+.toast.show{opacity:1}
+.foot{font-size:13px;color:var(--mut);padding:6px 20px 24px}
+.back{border:0;background:var(--card);border-radius:12px;min-height:40px;padding:0 12px;font-weight:800;cursor:pointer}
+@media(prefers-reduced-motion:reduce){.toast{transition:none}}
+@media(max-width:860px){.wrap{grid-template-columns:minmax(0,1fr);gap:24px;justify-items:center}.note{max-width:520px}.note h1{font-size:34px}}
+@media(max-width:520px){.wrap{display:block;padding:0;height:100%}.note{display:none}.phone{width:100%;height:100%;max-height:none;border:0;border-radius:0;box-shadow:none}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <section class="note">
+    <h1>App Bambú</h1>
+    <p>Prototipo navegable de turnos para las familias del Centro Terapéutico Integral Bambú.</p>
+    <div class="mode" role="group" aria-label="Vista"><button id="m-fam" class="on">Vista familia</button><button id="m-cen">Vista del centro</button></div>
+    <ol>
+      <li>Inicio: el próximo turno, con confirmar, reprogramar o cancelar.</li>
+      <li>Pedir turno: paciente, servicio, día y horario. Si el día está completo, lista de espera.</li>
+      <li>Cada turno se reserva con una seña por Mercado Pago, que se descuenta de la sesión.</li>
+      <li>Vista del centro: agenda del día, confirmaciones y lista de espera.</li>
+    </ol>
+    <small>Familia, profesionales, servicios y horarios son de ejemplo. Pagos, mensajes y cambios están simulados. La app no guarda diagnósticos.</small>
+  </section>
+  <div class="phone">
+    <div class="status"><span>9:41</span><span>Bambú</span><span>100%</span></div>
+    <main class="screen" id="screen"></main>
+    <nav class="tabs" id="tabs" aria-label="Secciones"></nav>
+    <div class="sheetbg" id="sheetbg"><div class="sheet" id="sheet" role="dialog" aria-modal="true"></div></div>
+    <div class="toast" id="toast" role="status"></div>
+  </div>
+</div>
+<script>
+{
+const IC={
+home:'<path d="M3 11 12 4l9 7v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/>',
+cal:'<rect x="3.5" y="5" width="17" height="15" rx="3"/><path d="M3.5 10h17M8 3v4M16 3v4"/>',
+plus:'<path d="M12 5v14M5 12h14"/>',
+news:'<path d="M12 20s-7.5-4.6-7.5-10.2A4.2 4.2 0 0 1 12 7.3a4.2 4.2 0 0 1 7.5 2.5C19.5 15.4 12 20 12 20z"/>',
+users:'<circle cx="9" cy="8" r="3.5"/><path d="M2.5 20a6.5 6.5 0 0 1 13 0M16 4.5a3.5 3.5 0 0 1 0 7M18 14a6 6 0 0 1 3.5 6"/>',
+bell:'<path d="M6 16V11a6 6 0 0 1 12 0v5l2 2H4zM10 21h4"/>',
+chat:'<path d="M4 5h16v11H9l-5 4z"/>',
+clock:'<circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/>',
+list:'<path d="M9 6h11M9 12h11M9 18h11M4 6h.01M4 12h.01M4 18h.01"/>'};
+const svg=(k,w=2)=>`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="${w}" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${IC[k]}</svg>`;
+const LOGO=`<svg viewBox="0 0 100 100" aria-hidden="true"><g fill="currentColor"><rect x="12" y="10" width="9" height="22" rx="4.5"/><rect x="12" y="35" width="9" height="20" rx="4.5"/><rect x="12" y="58" width="9" height="26" rx="4.5"/><path d="M12 22C4 20 1 14 1 10c6 0 10 4 11 12zM26 14c4-7 10-9 14-8-1 6-6 9-14 8z"/></g><path d="M21 80a30 30 0 1 0 6-40" fill="none" stroke="currentColor" stroke-width="8" stroke-linecap="round" stroke-dasharray="40 7"/><path d="M50 80 37 67a8 8 0 0 1 13-10 8 8 0 0 1 13 10z" fill="none" stroke="#f0843a" stroke-width="6" stroke-linejoin="round"/></svg>`;
+const PANDA=(cls='')=>`<svg class="${cls}" viewBox="0 0 120 120" aria-hidden="true"><ellipse cx="60" cy="112" rx="40" ry="5" fill="#000" opacity=".12"/><circle cx="30" cy="34" r="15" fill="#1d1d1d"/><circle cx="90" cy="34" r="15" fill="#1d1d1d"/><ellipse cx="60" cy="96" rx="34" ry="22" fill="#fff"/><circle cx="60" cy="58" r="38" fill="#fff"/><circle cx="60" cy="58" r="38" fill="#e9eeee" clip-path="inset(0 0 0 70%)" opacity=".6"/><ellipse cx="44" cy="56" rx="10" ry="12" fill="#1d1d1d" transform="rotate(-20 44 56)"/><ellipse cx="76" cy="56" rx="10" ry="12" fill="#1d1d1d" transform="rotate(20 76 56)"/><circle cx="46" cy="55" r="3.5" fill="#fff"/><path d="M71 56q4-4 8 0" stroke="#fff" stroke-width="2.6" fill="none" stroke-linecap="round"/><ellipse cx="60" cy="68" rx="5" ry="3.5" fill="#1d1d1d"/><path d="M55 74q5 6 10 0" stroke="#1d1d1d" stroke-width="2.4" fill="none" stroke-linecap="round"/><circle cx="36" cy="70" r="5" fill="#f7a8a8" opacity=".8"/><circle cx="84" cy="70" r="5" fill="#f7a8a8" opacity=".8"/><ellipse cx="34" cy="98" rx="11" ry="9" fill="#1d1d1d"/><ellipse cx="86" cy="98" rx="11" ry="9" fill="#1d1d1d"/><path d="M60 104 51 95a6 6 0 0 1 9-7 6 6 0 0 1 9 7z" fill="#f0843a"/></svg>`;
+
+const DN=['dom','lun','mar','mié','jue','vie','sáb'],MN=['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
+const T0=new Date();T0.setHours(0,0,0,0);
+const addW=(n)=>{const d=new Date(T0);let s=Math.sign(n),k=Math.abs(n);while(k>0){d.setDate(d.getDate()+s);if(d.getDay()%6)k--;}return d;};
+const key=d=>d.toISOString().slice(0,10);
+const DL=['domingo','lunes','martes','miércoles','jueves','viernes','sábado'];
+const longD=d=>`${DL[d.getDay()]} ${d.getDate()} de ${MN[d.getMonth()]}`;
+const fmt=n=>'$'+n.toLocaleString('es-AR');
+const SEN=8000;
+
+const KIDS=[{id:'tomi',n:'Tomás',e:7,cob:'OSEP',sena:false,c:'#1f9e95'},{id:'sofi',n:'Sofía',e:4,cob:'Particular',sena:true,c:'#f0843a'}];
+const SERV=[['fono','Fonoaudiología','Lic. Paula Rivas'],['psp','Psicopedagogía','Lic. Martín Sosa'],['to','Terapia ocupacional','Lic. Carla Videla'],['psi','Psicología','Lic. Andrea Molina'],['kine','Kinesiología','Lic. Julián Ortiz'],['est','Estimulación temprana','Lic. Romina Gil']];
+const HRS=['08:30','09:15','10:00','10:45','11:30','15:00','15:45','16:30','17:15'];
+const sv=id=>SERV.find(s=>s[0]===id);
+const kd=id=>KIDS.find(k=>k.id===id);
+let uid=10;
+const TURNOS=[
+{id:1,k:'tomi',s:'fono',d:addW(2),h:'10:00',st:'pend',pago:true},
+{id:2,k:'sofi',s:'psi',d:addW(4),h:'16:30',st:'ag',pago:true},
+{id:3,k:'tomi',s:'to',d:addW(7),h:'09:15',st:'ag',pago:true},
+{id:4,k:'tomi',s:'fono',d:addW(-3),h:'10:00',st:'ok2'},
+{id:5,k:'sofi',s:'psi',d:addW(-5),h:'16:30',st:'aus'},
+{id:6,k:'tomi',s:'to',d:addW(-8),h:'09:15',st:'ok2'}];
+const STL={pend:['Confirmá tu asistencia','pend'],ok:['Confirmado','ok'],ag:['Agendado','ag'],ok2:['Asistió','ok'],aus:['Ausente con aviso','aus'],can:['Cancelado','can']};
+const rnd=s=>{let h=0;for(const c of s)h=(h*31+c.charCodeAt(0))%2147483647;return()=>(h=h*16807%2147483647)/2147483647;};
+const taken=(d,s)=>{const r=rnd(key(d)+s);const full=r()<.18;return HRS.map(()=>full||r()<.45);};
+
+const st={tab:'inicio',kid:'tomi',srv:'fono',day:1,slot:null,reprog:null,hist:'prox'};
+const $=id=>document.getElementById(id);
+const scr=$('screen'),tabs=$('tabs'),bg=$('sheetbg'),sh=$('sheet'),toast=$('toast');
+const TABS=[['inicio','Inicio','home'],['turnos','Mis turnos','cal'],['pedir','Pedir','plus'],['novedades','Novedades','news'],['familia','Familia','users']];
+const top=()=>`<div class="top"><div class="brand">${LOGO}<div><b>ambú</b><small>Centro Terapéutico Integral</small></div></div><span class="proto">Prototipo</span></div>`;
+const upcoming=()=>TURNOS.filter(t=>t.d>=T0&&t.st!=='can').sort((a,b)=>a.d-b.d||a.h.localeCompare(b.h));
+const past=()=>TURNOS.filter(t=>t.d<T0).sort((a,b)=>b.d-a.d);
+const trow=t=>{const [l,c]=STL[t.st];return `<button class="trow" style="width:100%;background:none;border-left:0;border-right:0;border-top:0;text-align:left;cursor:pointer" data-t="${t.id}"><div class="date"><small>${DN[t.d.getDay()]}</small><b>${t.d.getDate()}</b></div><div class="info"><strong>${sv(t.s)[1]}</strong><span>${kd(t.k).n} · ${t.h} · ${sv(t.s)[2]}</span></div><span class="st ${c}">${l}</span></button>`;};
+
+const V={
+inicio:()=>{const n=upcoming()[0];return top()+`<div class="pad"><h2>Hola, Laura</h2><p class="sub">Acá tenés los turnos de Tomás y Sofía.</p>
+${n?`<div class="next"><div class="when">Próximo turno · ${longD(n.d)}</div><div class="big">${n.h} h</div><div class="who">${sv(n.s)[1]} · ${kd(n.k).n}<br>${sv(n.s)[2]}</div><span class="chip">${STL[n.st][0]}</span>${PANDA('panda')}</div>
+<div class="acts">${n.st==='pend'?`<button class="btn tq sm" data-conf="${n.id}">Confirmar</button>`:`<button class="btn tq sm" disabled>Confirmado</button>`}<button class="btn ghost sm" data-rep="${n.id}">Reprogramar</button><button class="btn ghost sm" data-can="${n.id}">Cancelar</button></div>
+${n.st==='pend'?`<div class="alert">${svg('bell')}<span>Confirmá antes de las 12 h del día anterior. Si no confirmás, el horario se le ofrece a otra familia en lista de espera.</span></div>`:''}`:`<div class="empty">${PANDA()}<p>No tenés turnos próximos.</p></div>`}
+</div><div class="pad"><div class="quick">
+<button class="q" data-go="pedir">${svg('plus')}<b>Pedir turno</b><span>Elegí día y horario</span></button>
+<button class="q" data-go="turnos">${svg('cal')}<b>Mis turnos</b><span>Próximos e historial</span></button>
+<button class="q" data-chat>${svg('chat')}<b>Escribir al centro</b><span>Consultas y avisos</span></button>
+<button class="q" data-go="familia">${svg('users')}<b>Mi familia</b><span>Pacientes y datos</span></button></div></div>
+<div class="pad"><button class="promo" data-go="novedades">${PANDA()}<span><b>Concurso "Mi lugar favorito"</b><span>Mandá tu foto en el lugar que más te guste de Bambú hasta el 30 de noviembre.</span></span></button></div>`;},
+turnos:()=>top()+`<div class="pad"><h2>Mis turnos</h2><div class="seg"><button data-h="prox" class="${st.hist==='prox'?'on':''}">Próximos</button><button data-h="hist" class="${st.hist==='hist'?'on':''}">Historial</button></div>
+${(st.hist==='prox'?upcoming():past()).map(trow).join('')||`<div class="empty">${PANDA()}<p>No hay turnos acá.</p></div>`}
+<button class="btn full" style="margin-top:16px" data-go="pedir">Pedir un turno nuevo</button></div>`,
+pedir:()=>{const days=Array.from({length:10},(_,i)=>addW(i+1));const d=days[st.day];const tk=taken(d,st.srv);const full=tk.every(Boolean);const k=kd(st.kid);
+return top()+`<div class="pad"><h2>${st.reprog?'Reprogramar turno':'Pedir turno'}</h2>
+<div class="lbl">Paciente</div><div class="chips">${KIDS.map(x=>`<button class="chip2 ${st.kid===x.id?'on':''}" data-kid="${x.id}">${x.n}</button>`).join('')}</div>
+<div class="lbl">Servicio</div><div class="chips">${SERV.map(s=>`<button class="chip2 ${st.srv===s[0]?'on':''}" data-srv="${s[0]}">${s[1]}</button>`).join('')}</div>
+<p class="sub" style="margin:8px 0 0;font-size:14px">Con ${sv(st.srv)[2]}</p>
+<div class="lbl">Día</div><div class="days">${days.map((x,i)=>`<button class="day ${i===st.day?'on':''} ${taken(x,st.srv).every(Boolean)?'full':''}" data-day="${i}"><small>${DN[x.getDay()]}</small><b>${x.getDate()}</b></button>`).join('')}</div>
+<div class="lbl">Horario · ${longD(d)}</div>
+${full?`<div class="empty">${PANDA()}<p style="margin:6px 0 12px"><b>Este día está completo.</b><br>Te avisamos si se libera un horario.</p><button class="btn tq" data-wait>Anotarme en lista de espera</button></div>`
+:`<div class="slots">${HRS.map((h,i)=>`<button class="slot ${st.slot===h?'on':''}" data-slot="${h}" ${tk[i]?'disabled':''}>${h}</button>`).join('')}</div>`}
+${st.reprog?`<div class="box">La seña que ya pagaste pasa al nuevo turno.</div>`:`<div class="box">El turno se reserva con una seña de ${fmt(SEN)} por Mercado Pago, que se descuenta de la sesión.</div>`}
+</div><div class="sticky"><button class="btn full" id="ask" ${st.slot&&!full?'':'disabled'}>${st.slot&&!full?`${st.reprog?'Cambiar al':'Pedir turno'} ${DN[d.getDay()]} ${d.getDate()} · ${st.slot} h`:'Elegí un horario'}</button></div>`;},
+novedades:()=>top()+`<div class="pad"><h2>Novedades</h2>
+<div class="news"><div class="art">${PANDA()}</div><div class="t"><span class="tag">Concurso · hasta el 30 de noviembre</span><b>¡Concurso "Mi lugar favorito"!</b><p>Sacate una foto en el lugar que más te guste de Bambú y mandala al celular del centro para que la subamos a las redes. Gana la foto con más reacciones: seguinos en redes y compartí la publicación.</p><button class="btn sm" style="margin-top:12px" data-chat>Enviar mi foto</button></div></div>
+<div class="news"><div class="t"><span class="tag">Aviso</span><b>Recordatorios de turnos</b><p>Desde la app te avisamos el día anterior a cada turno. Si no podés venir, cancelá con tiempo: tu horario le sirve a otra familia.</p></div></div>
+<p class="foot" style="padding:0">Facebook: Centro terapéutico bambu -lavalle</p></div>`,
+familia:()=>top()+`<div class="pad"><h2>Mi familia</h2><p class="sub">Laura Fernández · adulta responsable</p>
+${KIDS.map(k=>`<div class="kid"><div class="av" style="background:${k.c}">${k.n[0]}</div><div style="flex:1"><b>${k.n}, ${k.e} años</b><span>Cobertura: ${k.cob}</span></div></div>`).join('')}
+<div class="box">La app guarda solo lo necesario para los turnos: nombre, cobertura, horario y profesional. No guarda diagnósticos ni el certificado de discapacidad.</div>
+<div class="lbl">Avisos</div><div class="kv"><small>Recordatorio el día anterior</small><b>Activado</b></div><div class="kv"><small>Avisos de lista de espera</small><b>Activado</b></div>
+<button class="btn ghost full" style="margin-top:18px" data-go="centro">Ver la vista del centro (demo)</button></div><p class="foot">Familia de ejemplo para el prototipo.</p>`,
+centro:()=>{const rows=[['08:30','Tomás R.','Fonoaudiología','ok'],['09:15','Valentina M.','Terapia ocupacional','ok'],['10:00','Benjamín A.','Psicopedagogía','pend'],['10:45','Lucía P.','Fonoaudiología','ok'],['11:30','Mateo G.','Kinesiología','can'],['15:00','Emma S.','Psicología','ok'],['15:45','Thiago L.','Estimulación temprana','pend'],['16:30','Mía C.','Psicología','aus'],['17:15','Joaquín D.','Terapia ocupacional','ok']];
+const c=s=>rows.filter(r=>r[3]===s).length;
+return `<div class="top"><div class="brand">${LOGO}<div><b>ambú</b><small>Panel del centro</small></div></div><button class="back" data-go="inicio">Vista familia</button></div>
+<div class="pad"><h2>Agenda de hoy</h2><p class="sub">${longD(T0)}</p>
+<div class="stats"><div class="stat"><b>${c('ok')}</b><span>Confirmados</span></div><div class="stat"><b>${c('pend')}</b><span>Sin confirmar</span></div><div class="stat"><b>${c('can')+c('aus')}</b><span>Cancelados</span></div><div class="stat"><b>2</b><span>En espera</span></div></div>
+<div class="lbl">Turnos</div>${rows.map(r=>`<div class="ag"><time>${r[0]}</time><div><strong>${r[1]}</strong><span>${r[2]}</span></div><span class="st ${STL[r[3]][1]}">${{ok:'Confirmado',pend:'Sin confirmar',can:'Cancelado',aus:'Ausente'}[r[3]]}</span></div>`).join('')}
+<div class="lbl">Lista de espera</div>
+<div class="ag"><time>11:30</time><div><strong>Isabella F.</strong><span>Kinesiología · pidió cualquier horario de mañana</span></div><button class="btn tq sm" data-offer>Ofrecer</button></div>
+<div class="ag"><time>—</time><div><strong>Santino V.</strong><span>Psicología · tardes</span></div><span class="st ag">Esperando</span></div>
+<button class="btn ghost full" style="margin-top:16px" data-remind>Enviar recordatorio a los que no confirmaron</button></div><p class="foot">Pacientes de ejemplo para el prototipo.</p>`;}};
+
+function render(){
+  scr.innerHTML=V[st.tab]();
+  tabs.style.display=st.tab==='centro'?'none':'grid';
+  tabs.innerHTML=TABS.map(([k,n,i])=>`<button class="tab ${k==='pedir'?'plus':''} ${st.tab===k?'on':''}" data-go="${k}" aria-current="${st.tab===k?'page':'false'}"><span class="ic">${svg(i,k==='pedir'?2.6:2)}</span>${n}</button>`).join('');
+  $('m-fam').classList.toggle('on',st.tab!=='centro');$('m-cen').classList.toggle('on',st.tab==='centro');
+}
+function go(t,keep){if(t!=='pedir')st.reprog=null;st.tab=t;try{history.replaceState(null,'','#'+t)}catch(e){}render();if(!keep)scr.scrollTop=0;}
+function say(m){toast.textContent=m;toast.classList.add('show');clearTimeout(say.t);say.t=setTimeout(()=>toast.classList.remove('show'),1800);}
+function openSheet(h){sh.innerHTML='<div class="grab"></div>'+h;bg.classList.add('open');}
+function closeSheet(){bg.classList.remove('open');}
+const done=(t,m)=>openSheet(`<div class="center">${PANDA('pd')}<h3>${t}</h3><p class="sub">${m}</p><button class="btn tq full" data-close data-go="turnos">Ver mis turnos</button></div>`);
+const findT=id=>TURNOS.find(t=>t.id==id);
+const book=()=>{const d=addW(st.day+1);if(st.reprog){const o=findT(st.reprog);o.st='can';}TURNOS.push({id:++uid,k:st.kid,s:st.srv,d,h:st.slot,st:'ag',pago:true});const was=st.reprog;st.reprog=null;st.slot=null;done(was?'¡Turno reprogramado!':'¡Turno reservado!',`${sv(TURNOS[TURNOS.length-1].s)[1]} para ${kd(TURNOS[TURNOS.length-1].k).n}, ${longD(d)} a las ${TURNOS[TURNOS.length-1].h} h. Te avisamos el día anterior.`);};
+
+document.addEventListener('click',e=>{
+  const b=e.target.closest('button');if(!b)return;const d=b.dataset;
+  if(b.id==='m-fam'){go('inicio');return;} if(b.id==='m-cen'){go('centro');return;}
+  if(d.close!==undefined){closeSheet();if(d.go)go(d.go);return;}
+  if(d.go){go(d.go);return;}
+  if(d.h){st.hist=d.h;go('turnos',1);return;}
+  if(d.kid){st.kid=d.kid;go('pedir',1);return;}
+  if(d.srv){st.srv=d.srv;st.slot=null;go('pedir',1);return;}
+  if(d.day){st.day=+d.day;st.slot=null;go('pedir',1);return;}
+  if(d.slot){st.slot=d.slot;go('pedir',1);return;}
+  if(d.conf){findT(d.conf).st='ok';closeSheet();go(st.tab,1);say('Asistencia confirmada');return;}
+  if(d.rep){const t=findT(d.rep);st.reprog=t.id;st.kid=t.k;st.srv=t.s;st.slot=null;st.day=1;st.tab='pedir';render();scr.scrollTop=0;return;}
+  if(d.can){const t=findT(d.can);openSheet(`<h3>¿Cancelar el turno?</h3><div class="kv"><small>Turno</small><b>${sv(t.s)[1]} · ${kd(t.k).n}</b></div><div class="kv"><small>Día</small><b>${longD(t.d)}, ${t.h} h</b></div>${t.pago?`<div class="box">Como cancelás con más de 24 h de anticipación, se devuelve la seña de ${fmt(SEN)}.</div>`:''}<p class="sub" style="margin-top:12px">El horario se le ofrece a una familia en lista de espera.</p><button class="btn full" data-cdo="${t.id}">Sí, cancelar</button><button class="btn ghost full" style="margin-top:8px" data-close>No, mantener</button>`);return;}
+  if(d.cdo){findT(d.cdo).st='can';closeSheet();go(st.tab,1);say('Turno cancelado');return;}
+  if(d.t){const t=findT(d.t);const fut=t.d>=T0&&t.st!=='can';openSheet(`<h3>${sv(t.s)[1]}</h3><div class="kv"><small>Paciente</small><b>${kd(t.k).n}</b></div><div class="kv"><small>Día</small><b>${longD(t.d)}</b></div><div class="kv"><small>Hora</small><b>${t.h} h</b></div><div class="kv"><small>Profesional</small><b>${sv(t.s)[2]}</b></div><div class="kv"><small>Estado</small><b>${STL[t.st][0]}</b></div>${t.pago?`<div class="kv"><small>Seña</small><b>${fmt(SEN)} pagada</b></div>`:''}${fut?`<div class="acts" style="margin-top:14px">${t.st==='pend'?`<button class="btn tq sm" data-conf="${t.id}">Confirmar</button>`:`<button class="btn tq sm" disabled>${t.st==='ok'?'Confirmado':'Agendado'}</button>`}<button class="btn ghost sm" data-rep2="${t.id}">Reprogramar</button><button class="btn ghost sm" data-can="${t.id}">Cancelar</button></div>`:''}`);return;}
+  if(d.rep2){const t=findT(d.rep2);closeSheet();st.reprog=t.id;st.kid=t.k;st.srv=t.s;st.slot=null;st.day=1;st.tab='pedir';render();return;}
+  if(d.wait!==undefined){done('¡Estás en lista de espera!',`Si se libera un horario de ${sv(st.srv)[1]} ese día, te llega un aviso para tomarlo.`);return;}
+  if(d.chat!==undefined){openSheet(`<h3>Escribir al centro</h3><label style="display:block;font-weight:800;font-size:14px;margin-bottom:6px" for="msg">Tu mensaje</label><textarea id="msg" rows="4" style="width:100%;border-radius:12px;border:1.5px solid var(--line);background:var(--bg);padding:10px 12px;font-size:16px">Hola, les mando la foto para el concurso.</textarea><button class="btn full" style="margin-top:12px" data-sent>Enviar por WhatsApp</button><p class="foot" style="padding:8px 0 0">En la app real abre WhatsApp con el número del centro. Acá no se envía nada.</p>`);return;}
+  if(d.sent!==undefined){closeSheet();say('Mensaje listo (simulado)');return;}
+  if(d.offer!==undefined){b.outerHTML='<span class="st ok">Ofrecido</span>';say('Aviso enviado a la familia (simulado)');return;}
+  if(d.remind!==undefined){say('Recordatorios enviados (simulado)');return;}
+  if(b.id==='ask'){const k=kd(st.kid),dd=addW(st.day+1);openSheet(`<h3>${st.reprog?'Confirmá el cambio':'Confirmá tu turno'}</h3><div class="kv"><small>Paciente</small><b>${k.n}</b></div><div class="kv"><small>Servicio</small><b>${sv(st.srv)[1]}</b></div><div class="kv"><small>Profesional</small><b>${sv(st.srv)[2]}</b></div><div class="kv"><small>Día y hora</small><b>${longD(dd)}, ${st.slot} h</b></div>${!st.reprog?`<div class="kv"><small>Seña</small><b>${fmt(SEN)}</b></div><div class="box">Se descuenta de la sesión. Si cancelás con 24 h de anticipación, se devuelve.</div><button class="btn full" style="margin-top:14px;background:#00b1ea" data-pay>Pagar seña con Mercado Pago</button>`:`<div class="kv"><small>Seña</small><b>Ya pagada, pasa al nuevo turno</b></div><button class="btn full" style="margin-top:14px" data-book>${st.reprog?'Confirmar cambio':'Confirmar turno'}</button>`}<p class="foot" style="padding:10px 0 0">${!st.reprog?'En la app real se abre Mercado Pago y el turno se confirma solo al acreditarse el pago.':'Prototipo: el turno se guarda solo en esta pantalla.'}</p>`);return;}
+  if(d.pay!==undefined||d.book!==undefined){book();return;}
+});
+bg.addEventListener('click',e=>{if(e.target===bg)closeSheet();});
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closeSheet();});
+const h0=location.hash.slice(1);st.tab=V[h0]?h0:'inicio';render();
+window.addEventListener('hashchange',()=>{const k=location.hash.slice(1);if(V[k]&&k!==st.tab)go(k);});
+}
+</script>
+</body>
+</html>
